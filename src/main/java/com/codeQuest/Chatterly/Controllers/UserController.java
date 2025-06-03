@@ -5,6 +5,7 @@ import com.codeQuest.Chatterly.Entities.Users;
 import com.codeQuest.Chatterly.Services.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,7 @@ public class UserController {
     // Get all users
     @GetMapping
     public ResponseEntity<List<Users>> getUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+        return ResponseEntity.status(HttpStatus.OK).body(userService.getAllUsers());
     }
 
     // Get user by username
