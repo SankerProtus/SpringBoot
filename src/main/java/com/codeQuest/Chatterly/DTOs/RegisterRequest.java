@@ -4,7 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 @Data
-public class SignUpDto {
+public class RegisterRequest {
     @NotBlank(message = "Username is required")
     @Size(min = 2, message = "User name must be 2 or more characters")
     private String userName;

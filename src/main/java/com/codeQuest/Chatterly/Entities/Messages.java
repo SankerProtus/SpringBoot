@@ -33,5 +33,4 @@ public class Messages {
 
     @Column(name = "edited")
     private boolean edited = false;
-
 }

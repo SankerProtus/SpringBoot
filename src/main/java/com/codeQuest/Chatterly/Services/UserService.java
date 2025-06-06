@@ -1,13 +1,10 @@
 package com.codeQuest.Chatterly.Services;
 
-import com.codeQuest.Chatterly.DTOs.CreateServerDto;
-import com.codeQuest.Chatterly.DTOs.SignUpDto;
+import com.codeQuest.Chatterly.DTOs.RegisterRequest;
 import com.codeQuest.Chatterly.DTOs.UpdateUserRequest;
-import com.codeQuest.Chatterly.Entities.Servers;
 import com.codeQuest.Chatterly.Entities.Users;
 import com.codeQuest.Chatterly.Repositories.UserRepository;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -56,37 +53,37 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<?> signUp(SignUpDto signUpDto) {
+    public ResponseEntity<?> signUp(RegisterRequest registerRequest) {
         try {
 
             // Input validation
-            if (signUpDto.getUserName() == null || signUpDto.getEmail() == null ||
-                    signUpDto.getPhoneNumber() == null || signUpDto.getPassword() == null) {
+            if (registerRequest.getUserName() == null || registerRequest.getEmail() == null ||
+                    registerRequest.getPhoneNumber() == null || registerRequest.getPassword() == null) {
                 throw new IllegalArgumentException("All fields are required");
             }
 
             // Validate if passwords match
-            if (!signUpDto.getPassword().equals(signUpDto.getConfirmPassword())) {
+            if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("Passwords do not match");
             }
 
-            Optional<Users> signUpDtoOptional = userRepository.findByPhoneNumber(signUpDto.getPhoneNumber());
+            Optional<Users> signUpDtoOptional = userRepository.findByPhoneNumber(registerRequest.getPhoneNumber());
             if (signUpDtoOptional.isPresent()) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body("Username already exists");
             }
 
-            if (userRepository.existsByEmail(signUpDto.getEmail())) {
+            if (userRepository.existsByEmail(registerRequest.getEmail())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body("Email already exists");
             }
 
             Users newUser = new Users();
-            newUser.setUsername(signUpDto.getUserName());
-            newUser.setEmail(signUpDto.getEmail());
-            newUser.setPhoneNumber(signUpDto.getPhoneNumber());
-            String hashedPassword = passwordEncoder.encode(signUpDto.getPassword());
+            newUser.setUsername(registerRequest.getUserName());
+            newUser.setEmail(registerRequest.getEmail());
+            newUser.setPhoneNumber(registerRequest.getPhoneNumber());
+            String hashedPassword = passwordEncoder.encode(registerRequest.getPassword());
             newUser.setPasswordHash(hashedPassword);
             newUser.setCreatedAt(LocalDateTime.now());
             newUser.setUpdatedAt(LocalDateTime.now());
