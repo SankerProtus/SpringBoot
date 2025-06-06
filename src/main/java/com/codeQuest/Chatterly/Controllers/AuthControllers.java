@@ -19,7 +19,7 @@ public class AuthControllers {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginDto loginDto) {
-        return userService.login(loginDto.getUsername(), loginDto.getPassword());
+        return userService.login(loginDto.getPhoneNumber(), loginDto.getEmail(), loginDto.getPassword());
     }
 
     @PostMapping("/register")

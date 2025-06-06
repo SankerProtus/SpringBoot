@@ -1,26 +1,24 @@
 package com.codeQuest.Chatterly.Entities;
 
-import com.codeQuest.Chatterly.Enums.ChannelType;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Data;
+
+import java.util.List;
 
 @Entity
 @Data
-public class Channel {
+public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
-
-    @Enumerated(EnumType.STRING)
-    private ChannelType type;
-
     private Integer position;
 
     @ManyToOne
-    private Category category;
-
-    @ManyToOne
     private Servers server;
+
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    private List<Channel> channels;
+
 }

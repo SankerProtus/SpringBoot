@@ -1,29 +1,37 @@
 package com.codeQuest.Chatterly.Entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Table(name = "servers")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Data
 public class Servers {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
+    private String description;
+    private String serverIcon;
+    private LocalDateTime createdAt;
 
     @ManyToOne
-    @JoinColumn(name = "owner_id")
     private Users owner;
 
     @OneToMany(mappedBy = "server", cascade = CascadeType.ALL)
+    private List<Category> categories;
+
+    @OneToMany(mappedBy = "server", cascade = CascadeType.ALL)
     private List<Channel> channels;
+
+    @OneToMany(mappedBy = "server", cascade = CascadeType.ALL)
+    private List<ServerRole> roles;
+
+    @OneToMany(mappedBy = "server", cascade = CascadeType.ALL)
+    private List<ServerMember> members;
+
 }

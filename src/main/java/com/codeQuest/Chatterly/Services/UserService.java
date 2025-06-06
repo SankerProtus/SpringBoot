@@ -1,21 +1,24 @@
 package com.codeQuest.Chatterly.Services;
 
+import com.codeQuest.Chatterly.DTOs.CreateServerDto;
 import com.codeQuest.Chatterly.DTOs.SignUpDto;
 import com.codeQuest.Chatterly.DTOs.UpdateUserRequest;
+import com.codeQuest.Chatterly.Entities.Servers;
 import com.codeQuest.Chatterly.Entities.Users;
 import com.codeQuest.Chatterly.Repositories.UserRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @AllArgsConstructor
 @Service
@@ -44,8 +47,8 @@ public class UserService {
             Optional<Users> user = userRepository.findById(id);
             if (user.isPresent()) {
                 return userRepository.findById(id)
-                        .map(ResponseEntity::ok)
-                        .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
             }
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         } catch (Exception e) {
@@ -55,13 +58,20 @@ public class UserService {
 
     public ResponseEntity<?> signUp(SignUpDto signUpDto) {
         try {
+
+            // Input validation
+            if (signUpDto.getUserName() == null || signUpDto.getEmail() == null ||
+                    signUpDto.getPhoneNumber() == null || signUpDto.getPassword() == null) {
+                throw new IllegalArgumentException("All fields are required");
+            }
+
             // Validate if passwords match
             if (!signUpDto.getPassword().equals(signUpDto.getConfirmPassword())) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("Passwords do not match");
             }
 
-            Optional<Users> signUpDtoOptional = userRepository.findByUsername(signUpDto.getUsername());
+            Optional<Users> signUpDtoOptional = userRepository.findByPhoneNumber(signUpDto.getPhoneNumber());
             if (signUpDtoOptional.isPresent()) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body("Username already exists");
@@ -73,8 +83,9 @@ public class UserService {
             }
 
             Users newUser = new Users();
-            newUser.setUsername(signUpDto.getUsername());
+            newUser.setUsername(signUpDto.getUserName());
             newUser.setEmail(signUpDto.getEmail());
+            newUser.setPhoneNumber(signUpDto.getPhoneNumber());
             String hashedPassword = passwordEncoder.encode(signUpDto.getPassword());
             newUser.setPasswordHash(hashedPassword);
             newUser.setCreatedAt(LocalDateTime.now());
@@ -137,17 +148,24 @@ public class UserService {
 
     }
 
-    public ResponseEntity<?> login(String username, String password) {
+    public ResponseEntity<?> login(String phoneNumber, String email, String password) {
         try {
-            Optional<Users> user = userRepository.findByUsername(username);
+            Optional<Users> user = userRepository.findByPhoneNumber(phoneNumber);
+            boolean userByEmail = userRepository.existsByEmail(email);
+
             if (user.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("Invalid credentials");
+                        .body("Login or password is invalid");
+            }
+
+            if (!userByEmail) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Login or password is invalid");
             }
 
             if (!verifyPassword(password, user.get().getPasswordHash())) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("Invalid credentials");
+                        .body("Incorrect password");
             }
 
             // Create a response DTO that excludes sensitive information
