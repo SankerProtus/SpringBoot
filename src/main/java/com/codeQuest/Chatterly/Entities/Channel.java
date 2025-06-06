@@ -4,23 +4,30 @@ import com.codeQuest.Chatterly.Enums.ChannelType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 @Entity
+@Table(name = "channels")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Channel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
 
-    @Enumerated(EnumType.STRING)
-    private ChannelType type;
+    @Column
+    private String description;
 
-    private Integer position;
+    @ManyToMany(mappedBy = "channels")
+    private Set<Users> users = new HashSet<>();
 
-    @ManyToOne
-    private Category category;
+    @OneToMany(mappedBy = "channel", cascade = CascadeType.ALL)
+    private List<Messages> messages;
 
-    @ManyToOne
-    private Servers server;
 }

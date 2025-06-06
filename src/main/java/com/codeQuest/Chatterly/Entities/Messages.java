@@ -1,28 +1,37 @@
 package com.codeQuest.Chatterly.Entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Messages")
-@Getter
-@Setter
+@Table(name = "messages")
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Messages {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private String content;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private Users sender;
+    @JoinColumn(name = "user_id", nullable = false)
+    private Users user;
 
     @ManyToOne
-    @JoinColumn(name = "channel_id")
+    @JoinColumn(name = "channel_id", nullable = false)
     private Channel channel;
+
+    @CreationTimestamp
+    private LocalDateTime sentAt;
+
+    @Column(name = "edited")
+    private boolean edited = false;
+
 }
