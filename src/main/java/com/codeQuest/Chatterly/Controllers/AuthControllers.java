@@ -1,7 +1,7 @@
 package com.codeQuest.Chatterly.Controllers;
 
 import com.codeQuest.Chatterly.DTOs.LoginDto;
-import com.codeQuest.Chatterly.DTOs.SignUpDto;
+import com.codeQuest.Chatterly.DTOs.RegisterRequest;
 import com.codeQuest.Chatterly.Services.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -23,7 +23,7 @@ public class AuthControllers {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpDto signUpDto) {
-        return userService.signUp(signUpDto);
+    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
+        return userService.signUp(registerRequest);
     }
 }
