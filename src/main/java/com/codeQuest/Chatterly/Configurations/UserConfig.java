@@ -31,7 +31,7 @@ public class UserConfig {
         return args -> {
             try {
                 if (userRepository.count() == 0) {
-                    // Simulate user registration with test data
+                    // Test data
                     registerUser(userRepository, "Dery James", "0250000000", "james@gmail.com", "test123");
                     registerUser(userRepository, "Kuusofaa David", "0550000000", "david@gmail.com", "test123");
                     registerUser(userRepository, "Sanker Protus", "0240000000", "protus@gmail.com", "test123");

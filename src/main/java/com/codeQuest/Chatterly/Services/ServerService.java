@@ -106,7 +106,6 @@ public class ServerService {
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(createServerResponse(savedServer));
         } catch (Exception e) {
-            e.printStackTrace(); // Add this for better debugging
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Server creation failed: " + e.getMessage());
         }
@@ -165,7 +164,7 @@ public class ServerService {
         }
         
         response.put("channels", channels);
-        System.out.println("Final response map: " + response); // Debug log
+        System.out.println("Final response map: " + response);
         return response;
     }
 
@@ -179,18 +178,9 @@ public class ServerService {
         try {
             // First find by server ID
             Optional<Servers> server = serverRepository.findById(serverId);
-            if (server.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("error", "Server not found"));
-            }
+            return server.map(servers -> ResponseEntity.ok(createServerResponse(servers))).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Server not found")));
 
-            // Add authorization check - make sure the user is a member of the server
-            // if (!serverMemberRepository.existsByServerIdAndUserId(serverId, currentUserId)) {
-            //     return ResponseEntity.status(HttpStatus.FORBIDDEN)
-            //             .body(Map.of("error", "Access denied"));
-            // }
-
-            return ResponseEntity.ok(createServerResponse(server.get()));
         } catch (DataAccessException e) {
             log.error("Database error while fetching server {}: {}", serverId, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -209,7 +199,7 @@ public class ServerService {
         }
 
         try {
-            Users currentUser = getCurrentUser(); // Get current user first
+            Users currentUser = getCurrentUser();
         
             Optional<Servers> server = serverRepository.findById(serverId);
             if (server.isEmpty()) {
@@ -258,4 +248,27 @@ public class ServerService {
     return userRepository.findByUsername(username)
         .orElseThrow(() -> new IllegalStateException("Authenticated user not found in database"));
 }
+
+    public ResponseEntity<?> deleteServer(Long serverId) {
+        if (serverId == null || serverId <= 0) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Invalid server ID"));
+        }
+
+        try {
+            Optional<Servers> server = serverRepository.findById(serverId);
+            if (server.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Server not found"));
+            }
+
+            serverRepository.deleteById(serverId);
+            return ResponseEntity.ok("Server deleted successfully");
+        } catch (Exception e) {
+            log.error("Error deleting server {}: {}", serverId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to delete server"));
+        }
+    }
 }
+

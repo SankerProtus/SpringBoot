@@ -1,5 +1,6 @@
 package com.codeQuest.Chatterly.Entities;
 
+import com.codeQuest.Chatterly.Enums.ChannelType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,6 +24,18 @@ public class Channel {
 
     @Column
     private String description;
+
+
+    @Enumerated(EnumType.STRING)
+    private ChannelType type;
+
+    private int position;
+
+    @ManyToOne
+    private Category category;
+
+    @ManyToOne
+    private Servers server;
 
     @ManyToMany
     @JoinTable(

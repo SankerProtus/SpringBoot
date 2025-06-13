@@ -25,11 +25,11 @@ public class ServerRole {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Long id; // Changed from userId to id
+    private Long id;
 
     @NotBlank
     @Size(max = 255)
-    private String name; // Removed global unique constraint
+    private String name;
 
     @Size(max = 50)
     @Nullable

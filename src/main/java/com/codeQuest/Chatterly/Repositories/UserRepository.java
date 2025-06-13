@@ -13,6 +13,8 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<Users, Long> {
     boolean existsByEmail(String email);
     Optional<Users> findByUsername(String username);
-    Optional<Users> findByPhoneNumber(String phoneNumber);
-    Optional<Object> findByEmail(@NotBlank(message = "Email is required") @Email(message = "Email should be valid") String email);
+    Optional<Users> findByEmail(@NotBlank(message = "Email is required")
+                                @Email(message = "Email should be valid")
+                                String email);
+
 }

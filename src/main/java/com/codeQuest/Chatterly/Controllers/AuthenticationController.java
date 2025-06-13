@@ -2,6 +2,7 @@ package com.codeQuest.Chatterly.Controllers;
 
 import com.codeQuest.Chatterly.DTOs.AuthenticationRequest;
 import com.codeQuest.Chatterly.DTOs.AuthenticationResponse;
+import com.codeQuest.Chatterly.DTOs.LoginDto;
 import com.codeQuest.Chatterly.DTOs.RegisterRequest;
 import com.codeQuest.Chatterly.Services.AuthenticationService;
 import jakarta.validation.Valid;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
@@ -25,11 +26,15 @@ public class AuthenticationController {
         return ResponseEntity.ok(authenticationService.register(request));
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@Valid @RequestBody LoginDto loginDto) {
+        return authenticationService.login(loginDto.getUsername(), loginDto.getPassword());
+    }
+
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(
             @Valid @RequestBody AuthenticationRequest request
     ) {
         return ResponseEntity.ok(authenticationService.authenticate(request));
     }
-
 }

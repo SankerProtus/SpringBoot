@@ -30,4 +30,11 @@ public class ServerController {
     public ResponseEntity<?> joinServer(@PathVariable Long serverId) {
         return serverService.joinServer(serverId);
     }
+
+//    Delete a server
+    @DeleteMapping("/servers/{id}")
+    public ResponseEntity<?> deleteServer(@PathVariable Long id) {
+        return serverService.deleteServer(id);
+    }
 }
+

@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface ServerMemberRepository extends JpaRepository<ServerMember, Long> {
     boolean existsByServerAndUser(Servers server, Users user);
     Optional<ServerMember> findByServerIdAndUserId(Long serverId, Long userId);
+//    boolean existsByServerIdAndUserId(Long serverId, Long  userId);
 }
