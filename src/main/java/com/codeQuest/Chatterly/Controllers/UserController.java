@@ -23,17 +23,14 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(userService.getAllUsers());
     }
 
-    // Get user by username
+    // Get user by username or ID
     @GetMapping("/search")
-    public ResponseEntity<?> getUserByUsername(@Valid @RequestParam String username) {
-        return userService.findByUsername(username);
+    public ResponseEntity<?> getUserByUsernameOrId(@RequestParam(required = false) String username,
+                                                   @RequestParam(required = false) Long id) {
+        return userService.findByUsernameOrId(username, id);
     }
 
-    // Get user by ID
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getUser(@Valid @PathVariable Long id) {
-        return userService.getUserById(id);
-    }
+
 
     // Update user
     @PutMapping("/{id}")

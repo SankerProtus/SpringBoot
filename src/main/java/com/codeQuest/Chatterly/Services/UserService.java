@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Map;
@@ -25,31 +27,33 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public ResponseEntity<?> findByUsername(String username) {
+    public ResponseEntity<?> findByUsernameOrId(String username, Long id) {
         try {
-            Optional<Users> users = userRepository.findByUsername(username);
-            if (users.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+
+            if ((username == null || username.isBlank()) && id == null) {
+                return ResponseEntity.badRequest().body("At least one of 'username' or 'id' must be provided.");
             }
-            return new ResponseEntity<>(users, HttpStatus.OK);
+
+            if (username != null && !username.isBlank()) {
+                Optional<Users> userByUsername = userRepository.findByUsername(username);
+                if (userByUsername.isPresent()) {
+                    return ResponseEntity.ok(userByUsername.get());
+                }
+            }
+
+            if (id != null) {
+                Optional<Users> userById = userRepository.findById(id);
+                if (userById.isPresent()) {
+                    return ResponseEntity.ok(userById.get());
+                }
+            }
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(e.getMessage());
+            return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
         }
     }
 
-    public ResponseEntity<?> getUserById(Long id) {
-        try {
-            Optional<Users> user = userRepository.findById(id);
-            if (user.isPresent()) {
-                return userRepository.findById(id)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-            }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(e.getMessage());
-        }
-    }
 
     @Transactional
     public ResponseEntity<Users> updateUser(Long userId, UpdateUserRequest updateUserRequest) {
@@ -99,4 +103,5 @@ public class UserService {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }
+
 }

@@ -1,11 +1,11 @@
 package com.codeQuest.Chatterly.Configurations;
 
 import com.codeQuest.Chatterly.Security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -31,26 +31,32 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http
                 .csrf(AbstractHttpConfigurer::disable)
 
-                .authorizeHttpRequests(auth -> {
-                    auth
-                            .requestMatchers("/api/users/**", "/oauth2/**", "/login/**").permitAll()
-                            .anyRequest().authenticated();
-                })
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/**", "/oauth2/**", "/login/**").permitAll()
+                        .anyRequest().authenticated())
 
-                // 🔁 Allow sessions for OAuth2
+                // Allow sessions for OAuth2
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 
-                .oauth2Login(oauth2login -> {
-                    oauth2login.successHandler((request, response, authentication) -> response.sendRedirect("/homepage"));
-                })
-                .formLogin(Customizer.withDefaults());
+                .oauth2Login(oauth2login -> oauth2login.successHandler((request, response, authentication) -> response.sendRedirect("/homepage")))
+                .formLogin(AbstractHttpConfigurer::disable)
+                .securityContext(context -> context.requireExplicitSave(false))
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"error\": \"Unauthorized\"}");
+                        })
+                );
+
 
         return http.build();
     }
@@ -60,7 +66,6 @@ public class SecurityConfig {
         final OidcUserService delegate = new OidcUserService();
 
         return (userRequest) -> {
-            // Relax token validation
             userRequest.getClientRegistration().getProviderDetails()
                     .getConfigurationMetadata()
                     .put("jwt.clock.skew", Duration.ofMinutes(5).toSeconds());
@@ -68,5 +73,4 @@ public class SecurityConfig {
             return delegate.loadUser(userRequest);
         };
     }
-
 }
