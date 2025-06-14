@@ -6,7 +6,7 @@ import com.codeQuest.Chatterly.DTOs.RegisterRequest;
 import com.codeQuest.Chatterly.Entities.Users;
 import com.codeQuest.Chatterly.Exception.ResourceNotFoundException;
 import com.codeQuest.Chatterly.Repositories.UserRepository;
-import com.codeQuest.Chatterly.Security.JwtService;
+import com.codeQuest.Chatterly.Security.JWT.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

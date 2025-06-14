@@ -35,6 +35,8 @@ public class Users implements UserDetails {
 
     private String phoneNumber;
 
+    private String profilePicture;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 

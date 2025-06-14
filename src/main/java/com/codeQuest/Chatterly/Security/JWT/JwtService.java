@@ -1,4 +1,4 @@
-package com.codeQuest.Chatterly.Security;
+package com.codeQuest.Chatterly.Security.JWT;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -24,6 +24,7 @@ public class JwtService {
 
     @Value("${jwt.expiration}")
     private long jwtExpiration;
+
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);

@@ -1,4 +1,4 @@
-package com.codeQuest.Chatterly.Security;
+package com.codeQuest.Chatterly.Security.JWT;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,12 +31,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String userEmail;
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
+
         jwt = authHeader.substring(7);
         userEmail = jwtService.extractUsername(jwt);
+
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
             if (jwtService.isTokenValid(jwt, userDetails)) {
