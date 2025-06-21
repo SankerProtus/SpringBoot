@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>404 - Page Not Found</title>
+    <style>
+        .container {
+            text-align: center;
+            padding: 50px;
+        }
+
+        .container h1 {
+            font-size: 72px;
+            color: #e74c3c;
+        }
+
+        .container h2 {
+            font-size: 32px;
+            color: #333;
+        }
+
+        .container p {
+            color: #666;
+            margin-top: 20px;
+        }
+
+        .container button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #5c6bc0;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .container button:hover {
+            background-color: #3f51b5;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>404</h1>
+    <h2>Oops! Page Not Found</h2>
+    <p>The page you are looking for might have been removed or doesn't exist.</p>
+    <a th:href="@{/}"><button>Back to Home</button></a>
+</div>
+</body>
+</html>

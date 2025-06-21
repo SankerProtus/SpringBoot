@@ -20,7 +20,7 @@ public class Servers {
     private LocalDateTime createdAt;
 
     @ManyToOne
-    private Users owner;
+    private User owner;
 
     @OneToMany(mappedBy = "server", cascade = CascadeType.ALL)
     private List<Category> categories;
@@ -33,5 +33,8 @@ public class Servers {
 
     @OneToMany(mappedBy = "server", cascade = CascadeType.ALL)
     private List<ServerMember> members;
+
+    @ManyToOne
+    private User serverOwner;
 
 }

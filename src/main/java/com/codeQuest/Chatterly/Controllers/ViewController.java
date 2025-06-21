@@ -6,8 +6,23 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class ViewController {
 
-    @GetMapping("/homepage")
+    @GetMapping("/")
     public String homePage() {
-        return "redirect:/index.html";
+        return "homepage";
+    }
+
+    @GetMapping("/signup")
+    public String registerPage() {
+        return "signup";
+    }
+
+    @GetMapping("/login")
+    public String loginPage() {
+        return "login";
+    }
+
+    @GetMapping("/home")
+    public String chatPage() {
+        return "index";
     }
 }

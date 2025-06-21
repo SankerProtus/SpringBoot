@@ -28,7 +28,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
         String email = oauthUser.getAttribute("email");
 
-        // Find or create a user in your database
+        // Find a user in your database
         UserDetails userDetails = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
@@ -39,6 +39,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         authCookie.setHttpOnly(true);
         authCookie.setSecure(true);
         authCookie.setPath("/");
+        authCookie.setAttribute("SameSite", "Strict");
         response.addCookie(authCookie);
 
         response.sendRedirect("/home");

@@ -43,8 +43,8 @@ public class Channel {
         joinColumns = @JoinColumn(name = "channel_id"),
         inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private Set<Users> users = new HashSet<>();
+    private Set<User> users = new HashSet<>();
 
     @OneToMany(mappedBy = "channel", cascade = CascadeType.ALL)
-    private List<Messages> messages;
+    private List<Message> messages;
 }

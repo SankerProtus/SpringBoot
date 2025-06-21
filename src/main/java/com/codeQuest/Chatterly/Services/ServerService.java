@@ -4,6 +4,7 @@ import com.codeQuest.Chatterly.DTOs.CreateServerDto;
 import com.codeQuest.Chatterly.Entities.*;
 import com.codeQuest.Chatterly.Enums.ChannelType;
 import com.codeQuest.Chatterly.Enums.ServerPermission;
+import com.codeQuest.Chatterly.Exception.ResourceNotFoundException;
 import com.codeQuest.Chatterly.Repositories.*;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,19 +38,17 @@ public class ServerService {
         try {
             System.out.println("Creating server with DTO: " + createServerDto);
 
-            Optional<Users> owner = userRepository.findById(createServerDto.getOwnerId());
+            Optional<User> owner = userRepository.findById(createServerDto.getOwnerId());
             if (owner.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("Server details cannot be null");
             }
 
-            // Validate server name
             if (createServerDto.getName() == null || createServerDto.getName().trim().isEmpty()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("Server name is required");
             }
 
-            // Create and save server first
             Servers newServer = new Servers();
             newServer.setName(createServerDto.getName() != null ?
                     createServerDto.getName() : "New Server");
@@ -58,7 +58,7 @@ public class ServerService {
             newServer.setDescription(createServerDto.getDescription());
             Servers savedServer = serverRepository.save(newServer);
 
-            // Create and save category
+            // Create and save a category
             Category generalCategory = new Category();
             generalCategory.setName("Text Channels");
             generalCategory.setServer(savedServer);
@@ -82,7 +82,7 @@ public class ServerService {
             voiceChannel.setPosition(1);
             channelRepository.save(voiceChannel);
 
-            // Create and save roles - modified to handle duplicates
+            // Create and save a role
             ServerRole everyoneRole = serverRoleRepository.findByServerAndName(savedServer, "@everyone")
                     .orElseGet(() -> {
                         ServerRole role = createDefaultRole(savedServer, "@everyone", "#99AAB5");
@@ -168,7 +168,7 @@ public class ServerService {
         return response;
     }
 
-    // Add other necessary methods for server management
+    @Transactional
     public ResponseEntity<Map<String, Object>> getServer(Long serverId) {
         if (serverId == null || serverId <= 0) {
             return ResponseEntity.badRequest()
@@ -176,7 +176,6 @@ public class ServerService {
         }
 
         try {
-            // First find by server ID
             Optional<Servers> server = serverRepository.findById(serverId);
             return server.map(servers -> ResponseEntity.ok(createServerResponse(servers))).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", "Server not found")));
@@ -191,7 +190,8 @@ public class ServerService {
                     .body(Map.of("error", "An unexpected error occurred"));
         }
     }
-    
+
+    @Transactional
     public ResponseEntity<Map<String, Object>> joinServer(@PathVariable Long serverId) {
         if (serverId == null || serverId <= 0) {
             return ResponseEntity.badRequest()
@@ -199,23 +199,20 @@ public class ServerService {
         }
 
         try {
-            Users currentUser = getCurrentUser();
-        
-            Optional<Servers> server = serverRepository.findById(serverId);
-            if (server.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("error", "Server not found"));
-            }
+            User currentUser = getCurrentUser();
 
-            // Check if user is already a member
-            if (serverMemberRepository.existsByServerAndUser(server.get(), currentUser)) {
+            Servers server = serverRepository.findById(serverId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Server not found"));
+
+            // Check if a user is already a member
+            if (serverMemberRepository.existsByServerAndUser(server, currentUser)) {
                 return ResponseEntity.badRequest()
                         .body(Map.of("error", "User is already a member of this server"));
             }
 
             // Add user to server members
             ServerMember member = ServerMember.builder()
-                    .server(server.get())
+                    .server(server)
                     .user(currentUser)
                     .joinedAt(LocalDateTime.now())
                     .build();
@@ -224,8 +221,8 @@ public class ServerService {
 
             return ResponseEntity.ok(Map.of(
                     "message", "Successfully joined server",
-                    "serverName", server.get().getName(),
-                    "serverId", server.get().getId()
+                    "serverName", server.getName(),
+                    "serverId", server.getId()
             ));
 
         } catch (IllegalStateException e) {
@@ -238,37 +235,63 @@ public class ServerService {
         }
     }
 
-    private Users getCurrentUser() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication == null || !authentication.isAuthenticated()) {
-        throw new IllegalStateException("No authenticated user found");
-    }
-    
-    String username = authentication.getName();
-    return userRepository.findByUsername(username)
-        .orElseThrow(() -> new IllegalStateException("Authenticated user not found in database"));
-}
+    private User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("No authenticated user found");
+        }
 
-    public ResponseEntity<?> deleteServer(Long serverId) {
+        String username = authentication.getName();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalStateException("Authenticated user not found in database"));
+    }
+
+
+    public ResponseEntity<?> deleteServer(Long serverId, Principal principal) {
         if (serverId == null || serverId <= 0) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Invalid server ID"));
         }
 
         try {
-            Optional<Servers> server = serverRepository.findById(serverId);
-            if (server.isEmpty()) {
+            Optional<Servers> optionalServer = serverRepository.findById(serverId);
+            if (optionalServer.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(Map.of("error", "Server not found"));
             }
 
+            Servers server = optionalServer.get();
+
+            // Get current user
+            String currentUsername = principal.getName();
+            Optional<User> userOpt = userRepository.findByUsername(currentUsername);
+
+            if (userOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Unauthorized"));
+            }
+
+            User user = userOpt.get();
+
+            // Check if the user is the creator and has an ADMIN role
+            boolean isCreator = server.getServerOwner().getId().equals(user.getId());
+            boolean isAdmin = user.getRoles().stream()
+                    .anyMatch(role -> role.getName().equalsIgnoreCase("ADMIN"));
+
+            if (!isCreator || !isAdmin) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("error", "Only the admin who created this server can delete it"));
+            }
+
             serverRepository.deleteById(serverId);
             return ResponseEntity.ok("Server deleted successfully");
+
         } catch (Exception e) {
             log.error("Error deleting server {}: {}", serverId, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Failed to delete server"));
         }
     }
+
 }
 

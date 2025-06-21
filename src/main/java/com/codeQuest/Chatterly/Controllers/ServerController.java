@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
 @RestController
 @RequestMapping("/api/servers")
 @AllArgsConstructor
@@ -33,8 +35,8 @@ public class ServerController {
 
 //    Delete a server
     @DeleteMapping("/servers/{id}")
-    public ResponseEntity<?> deleteServer(@PathVariable Long id) {
-        return serverService.deleteServer(id);
+    public ResponseEntity<?> deleteServer(@PathVariable Long id, Principal principal) {
+        return serverService.deleteServer(id, principal);
     }
 }
 

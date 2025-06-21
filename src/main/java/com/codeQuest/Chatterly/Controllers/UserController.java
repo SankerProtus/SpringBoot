@@ -1,7 +1,7 @@
 package com.codeQuest.Chatterly.Controllers;
 
 import com.codeQuest.Chatterly.DTOs.UpdateUserRequest;
-import com.codeQuest.Chatterly.Entities.Users;
+import com.codeQuest.Chatterly.Entities.User;
 import com.codeQuest.Chatterly.Services.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -19,7 +19,7 @@ public class UserController {
 
     // Get all users
     @GetMapping
-    public ResponseEntity<List<Users>> getUsers() {
+    public ResponseEntity<List<User>> getUsers() {
         return ResponseEntity.status(HttpStatus.OK).body(userService.getAllUsers());
     }
 
@@ -30,8 +30,6 @@ public class UserController {
         return userService.findByUsernameOrId(username, id);
     }
 
-
-
     // Update user
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@Valid @PathVariable Long id,
@@ -40,7 +38,7 @@ public class UserController {
     }
 
     // Delete user
-    @DeleteMapping("/{id}")
+    @DeleteMapping("delete/{id}")
     public ResponseEntity<?> deleteUser(@Valid @PathVariable Long id) {
         return userService.deleteUser(id);
     }

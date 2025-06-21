@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Landing Page</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<div class="container">
+    <h1>Welcome to Chatterly</h1>
+    <p>Your favorite chat app clone!</p>
+    <div class="buttons">
+        <a th:href="@{/login}"><button>Login</button></a>
+        <a th:href="@{/signup}"><button>Sign Up</button></a>
+    </div>
+</div>
+</body>
+</html>

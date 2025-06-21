@@ -2,7 +2,6 @@ package com.codeQuest.Chatterly.Controllers;
 
 import com.codeQuest.Chatterly.DTOs.AuthenticationRequest;
 import com.codeQuest.Chatterly.DTOs.AuthenticationResponse;
-import com.codeQuest.Chatterly.DTOs.LoginDto;
 import com.codeQuest.Chatterly.DTOs.RegisterRequest;
 import com.codeQuest.Chatterly.Services.AuthenticationService;
 import jakarta.validation.Valid;
@@ -27,11 +26,6 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginDto loginDto) {
-        return authenticationService.login(loginDto.getUsername(), loginDto.getPassword());
-    }
-
-    @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(
             @Valid @RequestBody AuthenticationRequest request
     ) {

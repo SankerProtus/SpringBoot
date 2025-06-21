@@ -2,7 +2,6 @@ package com.codeQuest.Chatterly.Entities;
 
 import com.codeQuest.Chatterly.Repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,12 +17,17 @@ public class SimpleUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
 
-        Users user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        return User.withUsername(user.getUsername())
+        // Extract roles from a user
+        String[] roles = user.getRoles().stream()
+                .map(role -> role.getName().toUpperCase())
+                .toArray(String[]::new);
+
+        return org.springframework.security.core.userdetails.User.withUsername(user.getUsername())
                 .password(user.getPasswordHash())
-                .roles("USER")
+                .roles(roles)
                 .build();
     }
 }

@@ -1,17 +1,14 @@
 package com.codeQuest.Chatterly.Services;
 
 import com.codeQuest.Chatterly.DTOs.UpdateUserRequest;
-import com.codeQuest.Chatterly.Entities.Users;
+import com.codeQuest.Chatterly.Entities.User;
 import com.codeQuest.Chatterly.Repositories.UserRepository;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Map;
@@ -23,7 +20,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public List<Users> getAllUsers() {
+    public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
@@ -35,14 +32,14 @@ public class UserService {
             }
 
             if (username != null && !username.isBlank()) {
-                Optional<Users> userByUsername = userRepository.findByUsername(username);
+                Optional<User> userByUsername = userRepository.findByUsername(username);
                 if (userByUsername.isPresent()) {
                     return ResponseEntity.ok(userByUsername.get());
                 }
             }
 
             if (id != null) {
-                Optional<Users> userById = userRepository.findById(id);
+                Optional<User> userById = userRepository.findById(id);
                 if (userById.isPresent()) {
                     return ResponseEntity.ok(userById.get());
                 }
@@ -56,9 +53,9 @@ public class UserService {
 
 
     @Transactional
-    public ResponseEntity<Users> updateUser(Long userId, UpdateUserRequest updateUserRequest) {
+    public ResponseEntity<User> updateUser(Long userId, UpdateUserRequest updateUserRequest) {
         try {
-            Users user = userRepository.findById(userId)
+            User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
             if (!user.getEmail().equals(updateUserRequest.email())) {
@@ -91,7 +88,7 @@ public class UserService {
                         .body(Map.of("error", "Invalid user id"));
             }
 
-            Optional<Users> user = userRepository.findById(userId);
+            Optional<User> user = userRepository.findById(userId);
             if (user.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("User not found.");

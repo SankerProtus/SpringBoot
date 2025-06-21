@@ -1,6 +1,6 @@
 package com.codeQuest.Chatterly.Configurations;
 
-import com.codeQuest.Chatterly.Entities.Users;
+import com.codeQuest.Chatterly.Entities.User;
 import com.codeQuest.Chatterly.Repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Validator;
@@ -32,9 +32,9 @@ public class UserConfig {
             try {
                 if (userRepository.count() == 0) {
                     // Test data
-                    registerUser(userRepository, "Dery James", "0250000000", "james@gmail.com", "test123");
-                    registerUser(userRepository, "Kuusofaa David", "0550000000", "david@gmail.com", "test123");
-                    registerUser(userRepository, "Sanker Protus", "0240000000", "protus@gmail.com", "test123");
+                    registerUser(userRepository, "Dery James","james@gmail.com", "test123");
+                    registerUser(userRepository, "Kuusofaa David","david@gmail.com", "test123");
+                    registerUser(userRepository, "Sanker Protus", "protus@gmail.com", "test123");
                 }
             } catch (DataIntegrityViolationException e) {
                 throw new DataIntegrityViolationException("Database constraint violation while initializing users: " + e.getMessage(), e);
@@ -45,14 +45,13 @@ public class UserConfig {
     }
 
     @Transactional
-    private void registerUser(UserRepository userRepository, String username, String phoneNumber, 
+    private void registerUser(UserRepository userRepository, String username,
                             String email, String rawPassword) {
         LocalDateTime currentTime = LocalDateTime.now(ZoneOffset.UTC);
 
-        Users user = Users.builder()
+        User user = User.builder()
                 .username(username)
                 .email(email)
-                .phoneNumber(phoneNumber)
                 .passwordHash(passwordEncoder.encode(rawPassword))
                 .createdAt(currentTime)
                 .updatedAt(currentTime)
@@ -62,7 +61,7 @@ public class UserConfig {
         userRepository.save(user);
     }
 
-    private void validateUser(Users user) {
+    private void validateUser(User user) {
         var violations = validator.validate(user);
         if (!violations.isEmpty()) {
             throw new IllegalArgumentException("Validation failed: " + violations);
